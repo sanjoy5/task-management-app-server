@@ -50,7 +50,7 @@ async function run() {
         const usersCollection = client.db('taskDB').collection('users')
 
 
-        // 1st Task - jwt token
+        // 1st Task - make and send jwt token
 
         app.post('/jwt', (req, res) => {
             const user = req.body
@@ -76,11 +76,18 @@ async function run() {
         // Task Collection 
 
         app.get('/tasks', async (req, res) => {
-            const result = await tasksCollection.find().sort({ createdAt: -1 }).toArray()
+            const result = await tasksCollection.find().sort({ createdAt: -1 }).toArray();
             res.send(result)
         })
 
-        app.post('/add-task', async (req, res) => {
+        app.get('/tasks/:email', async (req, res) => {
+            const email = req.params.email;
+            const sortOrder = req.query.sortOrder || 'asc';
+            const result = await tasksCollection.find({ email: email }).sort({ price: sortOrder === 'asc' ? 1 : -1 }).toArray();
+            res.send(result)
+        })
+
+        app.post('/add-task/:email', async (req, res) => {
             const tasks = req.body
             tasks.createdAt = new Date()
             const result = await tasksCollection.insertOne(tasks)
