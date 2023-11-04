@@ -61,7 +61,7 @@ async function run() {
 
         // Users Collection 
 
-        app.post('/users', async (req, res) => {
+        app.post('/users', verifyJWT, async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
             const existUser = await usersCollection.findOne(query)
@@ -80,21 +80,21 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/tasks/:email', async (req, res) => {
+        app.get('/tasks/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const sortOrder = req.query.sortOrder || 'asc';
             const result = await tasksCollection.find({ email: email }).sort({ price: sortOrder === 'asc' ? 1 : -1 }).toArray();
             res.send(result)
         })
 
-        app.post('/add-task/:email', async (req, res) => {
+        app.post('/add-task/:email', verifyJWT, async (req, res) => {
             const tasks = req.body
             tasks.createdAt = new Date()
             const result = await tasksCollection.insertOne(tasks)
             res.send(result)
         })
 
-        app.delete('/delete-task/:id', async (req, res) => {
+        app.delete('/delete-task/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await tasksCollection.deleteOne(query)
