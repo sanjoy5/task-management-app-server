@@ -49,6 +49,12 @@ async function run() {
         const tasksCollection = client.db('taskDB').collection('task')
         const usersCollection = client.db('taskDB').collection('users')
 
+        // Create search  Index
+
+        // const indexKeys = { title: 1, description: 1 }
+        // const indexOptions = { name: 'titleDescription' }
+        // const result = await tasksCollection.createIndex(indexKeys, indexOptions)
+
 
         // 1st Task - make and send jwt token
 
@@ -83,11 +89,11 @@ async function run() {
         })
 
         // Get individual user task 
-        // app.get('/tasks/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const result = await tasksCollection.find({ email: email }).sort({ createdAt: -1 }).toArray();
-        //     res.send(result)
-        // })
+        app.get('/mytasks/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await tasksCollection.find({ email: email }).sort({ createdAt: -1 }).toArray();
+            res.send(result)
+        })
 
         // Get individual user task 
         app.get('/tasks/:email', verifyJWT, async (req, res) => {
@@ -98,6 +104,23 @@ async function run() {
             res.send(result)
             // console.log(result);
         })
+
+
+        app.get('/my-task-search/:text', verifyJWT, async (req, res) => {
+            const searchText = req.params.text;
+            const email = req.query.email;
+            const sortData = req.query.sortdata || 'asc';
+            const result = await tasksCollection.find({
+                $or: [
+                    { title: { $regex: searchText, $options: "i" } },
+                    { description: { $regex: searchText, $options: "i" } },
+                ],
+                email: email
+            }).sort({ createdAt: sortData === 'asc' ? 1 : -1 }).toArray()
+            res.send(result)
+
+        })
+
 
         // Post individual user task 
         app.post('/add-task/:email', verifyJWT, async (req, res) => {
