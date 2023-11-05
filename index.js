@@ -90,9 +90,12 @@ async function run() {
 
         // Get individual user task 
         app.get('/mytasks/:email', async (req, res) => {
-            const email = req.params.email;
-            const result = await tasksCollection.find({ email: email }).sort({ createdAt: -1 }).toArray();
+            const email = req.params.email
+            const sortData = req.query.sortdata || 'asc'
+            // console.log(sortData);
+            const result = await tasksCollection.find({ email: email }).sort({ createdAt: sortData === 'asc' ? 1 : -1 }).toArray();
             res.send(result)
+            // console.log(result);
         })
 
         // Get individual user task 
