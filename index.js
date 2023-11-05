@@ -61,6 +61,7 @@ async function run() {
 
         // Users Collection 
 
+        // Create User database 
         app.post('/users', verifyJWT, async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
@@ -75,11 +76,13 @@ async function run() {
 
         // Task Collection 
 
+        // Get all the task 
         app.get('/tasks', async (req, res) => {
             const result = await tasksCollection.find().sort({ createdAt: -1 }).toArray();
             res.send(result)
         })
 
+        // Get individual user task 
         app.get('/tasks/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const sortOrder = req.query.sortOrder || 'asc';
@@ -87,6 +90,7 @@ async function run() {
             res.send(result)
         })
 
+        // Post individual user task 
         app.post('/add-task/:email', verifyJWT, async (req, res) => {
             const tasks = req.body
             tasks.createdAt = new Date()
@@ -94,6 +98,32 @@ async function run() {
             res.send(result)
         })
 
+
+        // Get individual user updated task 
+        app.get('/updatetask/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await tasksCollection.findOne(query)
+            res.send(result)
+        })
+
+        // Update individual user task 
+        app.put('/updatetask/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const body = req.body;
+            // console.log(id, body);
+            const filter = { _id: new ObjectId(id) }
+            const updateClass = {
+                $set: {
+                    title: body.title,
+                    description: body.description,
+                }
+            }
+            const result = await tasksCollection.updateOne(filter, updateClass)
+            res.send(result)
+        })
+
+        // Delete individual user task 
         app.delete('/delete-task/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
@@ -113,7 +143,7 @@ async function run() {
 run().catch(console.dir);
 
 
-
+// Testing endpoint 
 app.get('/', (req, res) => {
     res.send('Task Management Appp running...')
 })
