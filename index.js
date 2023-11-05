@@ -62,7 +62,7 @@ async function run() {
         // Users Collection 
 
         // Create User database 
-        app.post('/users', verifyJWT, async (req, res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
             const existUser = await usersCollection.findOne(query)
@@ -83,11 +83,20 @@ async function run() {
         })
 
         // Get individual user task 
+        // app.get('/tasks/:email', async (req, res) => {
+        //     const email = req.params.email;
+        //     const result = await tasksCollection.find({ email: email }).sort({ createdAt: -1 }).toArray();
+        //     res.send(result)
+        // })
+
+        // Get individual user task 
         app.get('/tasks/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email;
-            const sortOrder = req.query.sortOrder || 'asc';
-            const result = await tasksCollection.find({ email: email }).sort({ price: sortOrder === 'asc' ? 1 : -1 }).toArray();
+            const email = req.params.email
+            const sortData = req.query.sortdata || 'asc'
+            // console.log(sortData);
+            const result = await tasksCollection.find({ email: email }).sort({ createdAt: sortData === 'asc' ? 1 : -1 }).toArray();
             res.send(result)
+            // console.log(result);
         })
 
         // Post individual user task 
